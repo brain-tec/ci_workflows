@@ -100,7 +100,6 @@ jobs:
             cd main/logs
             find . -name "*tests_out.log" -exec cat {} \;
             if grep -q "odoo.modules.module: Module" ./*/tests_out.log; then 
-              grep "odoo.modules.module: Module" ./*/tests_out.log
               echo "Some errors happened during the tests"
               exit 1
             else

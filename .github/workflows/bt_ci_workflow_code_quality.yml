@@ -34,6 +34,8 @@ jobs:
           cache: 'pip'
       - name: Install BT-CLI
         run: 'pip install -I ./bt-docker'
+      - name: Login to Registry
+        run: 'echo "${{ secrets.BT_REGISTRY_PASSWORD }}" | docker login registry.braintec-group.com -u "${{ secrets.BT_REGISTRY_USERNAME }}" --password-stdin'
       - name: Getting Pylint
         run: 'docker pull registry.braintec-group.com/bt-pylint:${{ env.PY_VERSION }}'
       - name: Check BT CLI installation

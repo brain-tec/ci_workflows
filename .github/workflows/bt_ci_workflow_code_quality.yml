@@ -13,29 +13,29 @@ jobs:
     env:
       PYTHONUNBUFFERED: 1
     steps:
-      - name: Decide Python Version
-        run: |
-          if [[ '${{ github.event.pull_request.base.ref }}' == '15.0'* ]]; then
-            echo "PY_VERSION=3.7" >> $GITHUB_ENV
-            echo "The Python version to be used is 3.7"
-          elif [[ '${{ github.event.pull_request.base.ref }}' == '14.0'* ]]; then
-            echo "PY_VERSION=3.6" >> $GITHUB_ENV
-            echo "The Python version to be used is 3.6"
-          else
-            echo "PY_VERSION=3.5" >> $GITHUB_ENV
-            echo "The Python version to be used is 3.5"
-          fi;
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.ACTIONS_READ_TOKEN }}
           path: main
-      - name: Install Python
-        uses: actions/setup-python@v4
-        id: python
-        with:
-          python-version: ${{ env.PY_VERSION }}
-          cache: 'pip'
+      - name: Decide Python Version
+        run: |
+          cd main
+          if grep -q "debian_codename" .braintec/deploy.yaml; then
+            if grep "debian_codename" .braintec/deploy.yaml | grep -q "stretch"; then
+              echo "PY_VERSION=3.5" >> $GITHUB_ENV
+              echo "The Python version to be used is 3.5"
+            elif grep "debian_codename" .braintec/deploy.yaml | grep -q "buster"; then
+              echo "PY_VERSION=3.7" >> $GITHUB_ENV
+              echo "The Python version to be used is 3.7"
+            elif grep "debian_codename" .braintec/deploy.yaml | grep -q "bullseye"; then
+              echo "PY_VERSION=3.9" >> $GITHUB_ENV
+              echo "The Python version to be used is 3.9"
+            fi;
+          else
+           echo "PY_VERSION=3.6" >> $GITHUB_ENV
+           echo "ERROR - Missing debian_codename in the deploy.yaml. Please add it. The default Python version to use will be 3.6"
+          fi;
       - name: Checkout BT-CLI
         uses: actions/checkout@v2
         with:
@@ -54,5 +54,5 @@ jobs:
       - name: Run Code Quality checks
         run: |
           cd main
-          ${{ inputs.code_quality_check_command }}
+          ${{ inputs.code_quality_check_command }} --py-version ${{ env.PY_VERSION }}
   

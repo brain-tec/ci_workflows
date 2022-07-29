@@ -25,12 +25,6 @@ jobs:
             echo "PY_VERSION=3.5" >> $GITHUB_ENV
             echo "The Python version to be used is 3.5"
           fi;
-      - name: Install Python
-        uses: actions/setup-python@v4
-        id: python
-        with:
-          python-version: ${{ env.PY_VERSION }}
-          cache: 'pip'
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -45,6 +39,12 @@ jobs:
           path: 'bt-docker'      
       - name: Install BT-CLI
         run: 'pip install -I ./bt-docker'
+      - name: Install Python
+        uses: actions/setup-python@v4
+        id: python
+        with:
+          python-version: ${{ env.PY_VERSION }}
+          cache: 'pip'
       - name: Getting Pylint
         run: 'docker pull registry.braintec-group.com/bt-pylint:${{ env.PY_VERSION }}'
       - name: Check BT CLI installation

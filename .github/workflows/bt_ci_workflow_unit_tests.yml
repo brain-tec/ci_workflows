@@ -25,17 +25,17 @@ jobs:
             echo "PY_VERSION=3.5" >> $GITHUB_ENV
             echo "The Python version to be used is 3.5"
           fi;
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACTIONS_READ_TOKEN }}
+          path: main
       - name: Install Python
         uses: actions/setup-python@v4
         id: python
         with:
           python-version: ${{ env.PY_VERSION }}
           cache: 'pip'
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.ACTIONS_READ_TOKEN }}
-          path: main
       - name: Checkout BT-CLI
         uses: actions/checkout@v2
         with:

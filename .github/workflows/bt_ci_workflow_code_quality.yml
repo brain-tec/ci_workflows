@@ -11,9 +11,26 @@ jobs:
     name: Code Quality checks
     runs-on: ubuntu-20.04
     env:
-      PY_VERSION: 3.6
       PYTHONUNBUFFERED: 1
     steps:
+      - name: Decide Python Version
+        run: |
+          if [[ '${{ github.event.pull_request.base.ref }}' == '15.0'* ]]; then
+            echo "PY_VERSION=3.7" >> $GITHUB_ENV
+            echo "The Python version to be used is 3.7"
+          elif [[ '${{ github.event.pull_request.base.ref }}' == '14.0'* ]]; then
+            echo "PY_VERSION=3.6" >> $GITHUB_ENV
+            echo "The Python version to be used is 3.6"
+          else
+            echo "PY_VERSION=3.5" >> $GITHUB_ENV
+            echo "The Python version to be used is 3.5"
+          fi;
+      - name: Install Python
+        uses: actions/setup-python@v4
+        id: python
+        with:
+          python-version: ${{ env.PY_VERSION }}
+          cache: 'pip'
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -25,13 +42,7 @@ jobs:
           ref: master
           token: ${{ secrets.ACTIONS_READ_TOKEN }}
           repository: brain-tec/bt-docker.git
-          path: 'bt-docker'
-      - name: Install Python
-        uses: actions/setup-python@v4
-        id: python
-        with:
-          python-version: ${{ env.PY_VERSION }}
-          cache: 'pip'
+          path: 'bt-docker'      
       - name: Install BT-CLI
         run: 'pip install -I ./bt-docker'
       - name: Login to Registry

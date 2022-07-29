@@ -30,12 +30,6 @@ jobs:
         with:
           token: ${{ secrets.ACTIONS_READ_TOKEN }}
           path: main
-      - name: Install Python
-        uses: actions/setup-python@v4
-        id: python
-        with:
-          python-version: ${{ env.PY_VERSION }}
-          cache: 'pip'
       - name: Checkout BT-CLI
         uses: actions/checkout@v2
         with:
@@ -54,5 +48,5 @@ jobs:
       - name: Run Code Quality checks
         run: |
           cd main
-          ${{ inputs.code_quality_check_command }}
+          ${{ inputs.code_quality_check_command }} --py-version ${{ env.PY_VERSION }}
   

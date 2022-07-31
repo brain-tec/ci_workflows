@@ -94,12 +94,22 @@ jobs:
           if test -f main/logs/*/tests_out.log; then
             cd main/logs
             find . -name "*tests_out.log" -exec cat {} \;
-            if grep -q "odoo.modules.module: Module" ./*/tests_out.log; then 
-              echo "Some errors happened during the tests"
-              exit 1
+            if [[  '${{ github.event.pull_request.base.ref }}' == '14.0'* || '${{ github.event.pull_request.base.ref }}' == '15.0'*  ]]; then
+              if grep -q "odoo.tests.runner: 0 failed, 0 error(s)" ./*/tests_out.log; then 
+                echo "All tests are passing"
+                exit 0
+              else
+                echo "Some errors happened during the tests"
+                exit 1
+              fi;
             else
-              echo "All tests are passing"
-              exit 0
+              if grep -q "odoo.modules.module: Module" ./*/tests_out.log; then 
+                echo "Some errors happened during the tests"
+                exit 1
+              else
+                echo "All tests are passing"
+                exit 0
+              fi;
             fi;
           else
             echo "Not found log for tests"
@@ -120,14 +130,25 @@ jobs:
         if: always()
         run: |
           if test -f main/logs/*/tests_out.log; then
-            if grep -q "odoo.modules.module: Module" main/logs/*/tests_out.log; then 
-              grep "odoo.modules.module: Module" main/logs/*/tests_out.log
-              echo "Some errors where found in the tests"
-              exit 1
-            else
-              echo "All tests are passing"
-              exit 0
-            fi;
+            if [[  '${{ github.event.pull_request.base.ref }}' == '14.0'* || '${{ github.event.pull_request.base.ref }}' == '15.0'*  ]]; then
+              if grep -q "odoo.tests.runner: 0 failed, 0 error(s)" main/logs/*/tests_out.log; then 
+                  echo "All tests are passing"
+                  exit 0
+                else
+                  grep "ERROR.*odoo.modules.loading: Module" main/logs/*/tests_out.log
+                  echo "Some errors where found in the tests"
+                  exit 1
+                fi;
+              else
+                if grep -q "odoo.modules.module: Module" main/logs/*/tests_out.log; then 
+                  grep "odoo.modules.module: Module" main/logs/*/tests_out.log
+                  echo "Some errors happened during the tests"
+                  exit 1
+                else
+                  echo "All tests are passing"
+                  exit 0
+                fi;
+              fi;
           else
              echo "Not found log for tests"
              exit 1

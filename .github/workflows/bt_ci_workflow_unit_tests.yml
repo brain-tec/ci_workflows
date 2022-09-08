@@ -21,7 +21,7 @@ jobs:
       - name: Checkout BT-CLI
         uses: actions/checkout@v2
         with:
-          ref: shallow-clones
+          ref: master
           token: ${{ secrets.ACTIONS_READ_TOKEN }}
           repository: brain-tec/bt-docker.git
           path: 'bt-docker'      

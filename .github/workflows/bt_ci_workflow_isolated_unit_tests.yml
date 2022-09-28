@@ -1,0 +1,71 @@
+name: "CI Workflow Isolated Unit Tests"
+on: 
+  workflow_call:
+    inputs:
+      isolated_unit_tests_check_command: 
+        required: true
+        type: string
+jobs:
+
+  job1:
+    name: Code Changes
+    runs-on: ubuntu-20.04    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: 'true'
+          token: ${{ secrets.ACTIONS_READ_TOKEN }}          
+          
+      - name: Get changed files 
+        id: changed-files
+        uses: tj-actions/changed-files@v31
+        with:
+          dir_names: true
+
+      - id: set-matrix
+        name: Create output for matrix with changed modules
+        run: |
+           echo $GITHUB_WORKSPACE
+           
+           delim=""
+           module_list=""          
+           for item in ${{ steps.changed-files.outputs.all_changed_files }}; do
+             echo "$item"
+             cleaned_item=$(echo "$item" | cut -d'/' -f 1)
+             path_tests="$GITHUB_WORKSPACE/$cleaned_item"             
+             if [  "$cleaned_item" == "ext"  ]; then
+               cleaned_item=$(echo "$item" | cut -d'/' -f 3)               
+               submodule_name=$(echo "$item" | cut -d'/' -f 2)
+               path_tests="$GITHUB_WORKSPACE/ext/$submodule_name/$cleaned_item"               
+             fi;
+             if [  -d $path_tests/tests  ]; then
+               module_list="$module_list$delim$cleaned_item"
+               delim=" "
+             fi;
+           done
+           module_list=($module_list)
+           uniques=($(for v in "${module_list[@]}"; do echo "$v";done| sort| uniq| xargs))           
+           delim=""
+           module_list_unique=""
+           for module in "${uniques[@]}"; do
+             module_list_unique="$module_list_unique$delim'$module'"
+             delim=","
+           done
+           module_list_unique="[$module_list_unique]"
+           echo $module_list_unique
+           echo "::set-output name=value::$module_list_unique"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.value }}
+          
+  job2:
+    name: Isolated Unit Tests - ${{ matrix.value }}
+    needs: job1
+    strategy:
+      matrix:
+        value: ${{fromJSON(needs.job1.outputs.matrix)}}
+    uses: brain-tec/ci_workflows/.github/workflows/bt_ci_workflow_unit_tests.yml@master
+    with: 
+      unit_tests_check_command: ${{ inputs.isolated_unit_tests_check_command }} --modules ${{ matrix.value }}      
+    secrets: inherit

@@ -60,7 +60,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.value }}
           
   job2:
-    name: Isolated Unit Tests - ${{ matrix.value }}
+    name: ${{ matrix.value }}
     needs: job1
     strategy:
       matrix:

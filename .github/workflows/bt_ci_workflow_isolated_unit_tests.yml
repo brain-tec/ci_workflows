@@ -24,14 +24,15 @@ jobs:
         
       - uses: actions/setup-python@v2
       
-      - id: set-matrix
+      - name: Get modules to test
+        id: set-matrix
         uses: jannekem/run-python-script-action@v1
         with:
           script: |
             import os.path
             
             filenames = "${{  steps.changed-files.outputs.all_changed_files  }}".split(' ')
-            commands = ${{ inputs.isolated_unit_tests_check_command }}.split('--')
+            commands = "${{ inputs.isolated_unit_tests_check_command }}".split('--')
             
             commands_dict = {}
             for command in commands:

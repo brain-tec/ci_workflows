@@ -1,0 +1,93 @@
+name: "CI Workflow Isolated Unit Tests"
+on: 
+  workflow_call:
+    inputs:
+      isolated_unit_tests_check_command: 
+        required: true
+        type: string
+jobs:
+
+  job1:
+    name: Code Changes
+    runs-on: ubuntu-20.04    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: 'true'
+          token: ${{ secrets.ACTIONS_READ_TOKEN }}          
+          
+      - name: Get changed files 
+        id: changed-files
+        uses: tj-actions/changed-files@v31 
+        
+      - name: Install Python
+        uses: actions/setup-python@v2
+      
+      - name: Get modules to test
+        id: set-matrix
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import os.path
+            
+            filenames = "${{  steps.changed-files.outputs.all_changed_files  }}".split(' ')
+            commands = "${{ inputs.isolated_unit_tests_check_command }}".split('--')
+            
+            commands_dict = {}
+            for command in commands:
+                split_command = command.split(' ')
+                commands_dict[split_command[0]] = split_command[1:]
+            if 'test-submodules' in commands_dict:
+                commands_dict['test-submodules'] = commands_dict['test-submodules'][0].split(',')
+            if 'exclude-install' in commands_dict:
+                commands_dict['exclude-install'] = commands_dict['exclude-install'][0].split(',')
+            if 'exclude-test' in commands_dict:
+                commands_dict['exclude-test'] = commands_dict['exclude-test'][0].split(',')
+            
+            modules_to_process = set()
+            for filename in filenames:
+                from_submodule = False            
+                extension = os.path.splitext(filename)[1]
+                if extension in ['.py', '.xml', '.js', '.csv', .po', '.css', '.scss']:
+                    module = filename.split('/')[0]
+                    module_path = filename.split('/')[0]
+                    if filename.split('/')[0] == 'ext':
+                        module = filename.split('/')[2]
+                        module_path = '/'.join(filename.split('/')[:3])
+                        submodule = filename.split('/')[1]
+                        from_submodule = True
+                    conditions = []
+                    module_has_tests = os.path.isdir("{0}/{1}/{2}".format(os.environ.get("GITHUB_WORKSPACE"), module_path, 'tests'))
+                    conditions.append(module_has_tests)
+                    if 'test-submodules' in commands_dict:                        
+                        submodule_not_to_test = ((len(submodule) > 3 and submodule[:3] == 'bt-') or submodule in commands_dict['test-submodules'])
+                        conditions.append(submodule_not_to_test)
+                    else:
+                       # If we don't specify we want to test submdodules, changes of submodules should be ignored
+                       conditions.append(False if from_submodule else True)
+                    if 'exclude-install' in commands_dict:
+                        module_installation_not_excluded = module not in commands_dict['exclude-install']
+                        conditions.append(module_installation_not_excluded)
+                    if 'exclude-test' in commands_dict:
+                        module_test_not_excluded = module not in commands_dict['exclude-test']
+                        conditions.append(module_test_not_excluded)
+                    if all(conditions):
+                        modules_to_process.add(module)
+            
+            print(str(list(modules_to_process)))
+            set_env("MATRIX_MODULES", str(list(modules_to_process)))
+    outputs:
+      matrix: ${{ env.MATRIX_MODULES }}
+          
+  job2:
+    name: Isolated Unit Tests - ${{ matrix.value }}
+    needs: job1
+    strategy:
+      matrix:
+        value: ${{fromJSON(needs.job1.outputs.matrix)}}
+    uses: brain-tec/ci_workflows/.github/workflows/bt_ci_workflow_unit_tests.yml@master
+    with: 
+      unit_tests_check_command: ${{ inputs.isolated_unit_tests_check_command }} --modules ${{ matrix.value }}      
+    secrets: inherit   

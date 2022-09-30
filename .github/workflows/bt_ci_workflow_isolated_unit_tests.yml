@@ -82,7 +82,7 @@ jobs:
       matrix: ${{ env.MATRIX_MODULES }}
           
   job2:
-    name: Isolated Unit Tests - ${{ matrix.value }}
+    name: ${{ matrix.value }}
     needs: job1
     strategy:
       matrix:

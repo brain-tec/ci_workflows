@@ -1,4 +1,4 @@
-name: "Deploy BT-App"
+name: "Deploy BT-App-SFTP"
 
 on: 
   workflow_call:
@@ -19,19 +19,19 @@ jobs:
       PY_TARGETS: ${{ inputs.py_targets }}
       SFTP_HOST: ${{ secrets.ODOO_APPS_SFTP_USER }}@odoo-apps.bt-group.com
     steps:
-      - name: "checkout"
+      - name: "Checkout"
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.ACTIONS_READ_TOKEN }}
           path: main
-      - name: "install bt-script"
+      - name: "Install bt-script"
         uses: actions/checkout@v2
         with:
           ref: travis_utils
           token: ${{ secrets.ACTIONS_READ_TOKEN }}
           repository: brain-tec/bt-script.git
           path: 'bt-script'
-      - name: "setup ssh keys"
+      - name: "Setup SSH Keys"
         run: |
           set -e;
           mkdir -p $HOME/.ssh
@@ -42,7 +42,7 @@ jobs:
           echo "IdentityFile $HOME/.ssh/id_ed25519" >> $HOME/.ssh/config
           echo "IdentityFile $HOME/.ssh/id_ed25519_apps" >> $HOME/.ssh/config
 
-      - name: "build & compile"
+      - name: "Build & Deploy"
         run: | 
           cd main 
           bash ../bt-script/travis/travis_build_deploy

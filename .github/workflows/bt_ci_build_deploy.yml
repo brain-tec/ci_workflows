@@ -49,8 +49,10 @@ jobs:
 
       - name: "Deploy Info"
         run: | 
-          cd main/build
-          echo "Deployment Done!"
-          for mod in $(ls -d */); do
-            echo "https://odoo-apps.bt-group.com/$mod"
-          done
+          if [[ -d main/build ]]; then
+            cd main/build 
+            echo "Deployment Done!"
+            for mod in $(ls -d */); do
+              echo "https://odoo-apps.bt-group.com/$mod"
+            done
+          fi

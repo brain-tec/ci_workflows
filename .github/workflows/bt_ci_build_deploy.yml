@@ -27,7 +27,7 @@ jobs:
       - name: "Install bt-script"
         uses: actions/checkout@v2
         with:
-          ref: travis_utils
+          ref: master
           token: ${{ secrets.ACTIONS_READ_TOKEN }}
           repository: brain-tec/bt-script.git
           path: 'bt-script'
@@ -45,7 +45,7 @@ jobs:
       - name: "Build & Deploy"
         run: | 
           cd main 
-          bash ../bt-script/travis/travis_build_deploy
+          bash ../bt-script/ci_tools/build_deploy
 
       - name: "Deploy Info"
         run: | 

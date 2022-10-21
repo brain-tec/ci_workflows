@@ -1,0 +1,58 @@
+name: "Deploy BT-App"
+
+on: 
+  workflow_call:
+    inputs:
+      build_modules: 
+        required: true
+        type: string
+      py_targets:
+        required: true
+        type: string
+        default: "3.6 3.7 3.8 3.9 3.10"
+        
+jobs:
+  deploy:
+    name: "deploy"
+    runs-on: ubuntu-20.04
+    secrets: inherit
+    env:
+      MODULES: ${{ inputs.build_modules }}
+      PY_TARGETS: ${{ inputs.py_targets }}
+      SFTP_HOST: ${{ secrets.ODOO_APPS_SFTP_USER }}@odoo-apps.bt-group.com
+    steps:
+      - name: "checkout"
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACTIONS_READ_TOKEN }}
+          path: main
+      - name: "install bt-script"
+        uses: actions/checkout@v2
+        with:
+          ref: travis_utils
+          token: ${{ secrets.ACTIONS_READ_TOKEN }}
+          repository: brain-tec/bt-script.git
+          path: 'bt-script'
+      - name: "setup ssh keys"
+        run: |
+          set -e;
+          mkdir -p $HOME/.ssh
+          echo "${{ secrets.ACTIONS_READ_SSH }}" > $HOME/.ssh/id_ed25519
+          echo "${{ secrets.ODOO_APPS_SFTP_KEY }}" > $HOME/.ssh/id_ed25519_apps
+          chmod 600 $HOME/.ssh/id_ed25519
+          chmod 600 $HOME/.ssh/id_ed25519_apps
+          echo "IdentityFile $HOME/.ssh/id_ed25519" >> $HOME/.ssh/config
+          echo "IdentityFile $HOME/.ssh/id_ed25519_apps" >> $HOME/.ssh/config
+
+      - name: "build & compile"
+        run: | 
+          cd main 
+          bash ../bt-script/travis/travis_build_deploy
+
+      - name: "Deploy Info"
+        run: | 
+          cd main/build
+          echo "Deployment Done!"
+          for mod in $(ls -d */); do
+            echo "https://odoo-apps.bt-group.com/$mod"
+          done

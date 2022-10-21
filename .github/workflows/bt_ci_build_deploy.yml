@@ -7,7 +7,6 @@ on:
         required: true
         type: string
       py_targets:
-        required: true
         type: string
         default: "3.6 3.7 3.8 3.9 3.10"
         
@@ -15,7 +14,6 @@ jobs:
   deploy:
     name: "deploy"
     runs-on: ubuntu-20.04
-    secrets: inherit
     env:
       MODULES: ${{ inputs.build_modules }}
       PY_TARGETS: ${{ inputs.py_targets }}

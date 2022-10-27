@@ -21,6 +21,7 @@ jobs:
       PY_TARGETS: ${{ inputs.py_targets }}
       GIT_COMMIT: ${{ inputs.git_commit }}
       SFTP_HOST: ${{ secrets.ODOO_APPS_SFTP_USER }}@odoo-apps.bt-group.com
+      GITHUB_CONTEXT: ${{ toJson(github) }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
@@ -36,6 +37,7 @@ jobs:
           path: 'bt-script'
       - name: "Setup SSH Keys"
         run: |
+          echo "$GITHUB_CONTEXT"
           set -e;
           mkdir -p $HOME/.ssh
           echo "${{ secrets.ACTIONS_READ_SSH }}" > $HOME/.ssh/id_ed25519

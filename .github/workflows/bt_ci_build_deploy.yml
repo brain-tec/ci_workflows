@@ -9,8 +9,6 @@ on:
       py_targets:
         type: string
         default: "3.6 3.7 3.8 3.9 3.10"
-      git_commit:
-        type: string
         
 jobs:
   deploy:
@@ -19,7 +17,8 @@ jobs:
     env:
       MODULES: ${{ inputs.build_modules }}
       PY_TARGETS: ${{ inputs.py_targets }}
-      GIT_COMMIT: ${{ inputs.git_commit }}
+      GIT_COMMIT: ${{ github.event.before }}
+      GIT_COMMIT_RANGE: ${{ github.event.before }}..
       SFTP_HOST: ${{ secrets.ODOO_APPS_SFTP_USER }}@odoo-apps.bt-group.com
       GITHUB_CONTEXT: ${{ toJson(github) }}
     steps:

@@ -18,6 +18,7 @@ jobs:
       MODULES: ${{ inputs.build_modules }}
       PY_TARGETS: ${{ inputs.py_targets }}
       SFTP_HOST: ${{ secrets.ODOO_APPS_SFTP_USER }}@odoo-apps.bt-group.com
+      GIT_COMMIT_RANGE: ${{ github.before }}..
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
@@ -41,10 +42,10 @@ jobs:
           chmod 600 $HOME/.ssh/id_ed25519_apps
           echo "IdentityFile $HOME/.ssh/id_ed25519" >> $HOME/.ssh/config
           echo "IdentityFile $HOME/.ssh/id_ed25519_apps" >> $HOME/.ssh/config
-
       - name: "Build & Deploy"
         run: | 
           cd main 
+          git fetch origin ${{ github.before }}
           bash ../bt-script/ci_tools/build_deploy
 
       - name: "Deploy Info"

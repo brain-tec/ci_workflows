@@ -45,7 +45,8 @@ jobs:
       - name: "Build & Deploy"
         run: | 
           cd main 
-          git fetch origin ${{ github.before }}
+          git fetch --depth=0 origin ${{ github.before }}
+          git diff  ${{ github.before }}..
           bash ../bt-script/ci_tools/build_deploy
 
       - name: "Deploy Info"

@@ -17,7 +17,10 @@ jobs:
     env:
       MODULES: ${{ inputs.build_modules }}
       PY_TARGETS: ${{ inputs.py_targets }}
+      GIT_COMMIT: ${{ github.event.before }}
+      GIT_COMMIT_RANGE: ${{ github.event.before }}...${{ github.event.after }}
       SFTP_HOST: ${{ secrets.ODOO_APPS_SFTP_USER }}@odoo-apps.bt-group.com
+      GITHUB_CONTEXT: ${{ toJson(github) }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
@@ -33,6 +36,7 @@ jobs:
           path: 'bt-script'
       - name: "Setup SSH Keys"
         run: |
+          echo "$GITHUB_CONTEXT"
           set -e;
           mkdir -p $HOME/.ssh
           echo "${{ secrets.ACTIONS_READ_SSH }}" > $HOME/.ssh/id_ed25519
@@ -41,10 +45,10 @@ jobs:
           chmod 600 $HOME/.ssh/id_ed25519_apps
           echo "IdentityFile $HOME/.ssh/id_ed25519" >> $HOME/.ssh/config
           echo "IdentityFile $HOME/.ssh/id_ed25519_apps" >> $HOME/.ssh/config
-
       - name: "Build & Deploy"
         run: | 
           cd main 
+          git fetch --depth=1 origin $GIT_COMMIT
           bash ../bt-script/ci_tools/build_deploy
 
       - name: "Deploy Info"

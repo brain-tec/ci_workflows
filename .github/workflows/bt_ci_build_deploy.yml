@@ -9,6 +9,8 @@ on:
       py_targets:
         type: string
         default: "3.6 3.7 3.8 3.9 3.10"
+      git_commit:
+        type: string
         
 jobs:
   deploy:
@@ -17,6 +19,7 @@ jobs:
     env:
       MODULES: ${{ inputs.build_modules }}
       PY_TARGETS: ${{ inputs.py_targets }}
+      GIT_COMMIT: ${{ inputs.git_commit }}
       SFTP_HOST: ${{ secrets.ODOO_APPS_SFTP_USER }}@odoo-apps.bt-group.com
     steps:
       - name: "Checkout"
@@ -44,9 +47,9 @@ jobs:
       - name: "Build & Deploy"
         run: | 
           cd main 
-          echo $GIT_COMMIT
+          echo "COMMIT: $GIT_COMMIT"
           git fetch --depth=1 origin $GIT_COMMIT
-          git diff "$GIT_COMMIT.." -- 
+          git diff "${GIT_COMMIT}.." -- 
           bash ../bt-script/ci_tools/build_deploy
 
       - name: "Deploy Info"

@@ -44,6 +44,7 @@ jobs:
       - name: "Build & Deploy"
         run: | 
           cd main 
+          echo $GIT_COMMIT
           git fetch --depth=1 origin $GIT_COMMIT
           git diff "$GIT_COMMIT.." -- 
           bash ../bt-script/ci_tools/build_deploy

@@ -50,7 +50,7 @@ jobs:
             for filename in filenames:
                 from_submodule = False            
                 extension = os.path.splitext(filename)[1]
-                if extension in ['.py', '.xml', '.js', '.csv', .po', '.css', '.scss']:
+                if extension in ['.py', '.xml', '.js', '.csv', '.po', '.css', '.scss']:
                     module = filename.split('/')[0]
                     module_path = filename.split('/')[0]
                     if filename.split('/')[0] == 'ext':

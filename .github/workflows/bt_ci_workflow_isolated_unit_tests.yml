@@ -61,7 +61,7 @@ jobs:
                     conditions = []
                     module_has_tests = os.path.isdir("{0}/{1}/{2}".format(os.environ.get("GITHUB_WORKSPACE"), module_path, 'tests'))
                     conditions.append(module_has_tests)
-                    if 'test-submodules' in commands_dict:                        
+                    if from_submodule and 'test-submodules' in commands_dict:                        
                         submodule_not_to_test = ((len(submodule) > 3 and submodule[:3] == 'bt-') or submodule in commands_dict['test-submodules'])
                         conditions.append(submodule_not_to_test)
                     else:

@@ -39,7 +39,7 @@ jobs:
             for command in commands:
                 split_command = command.split(' ')
                 commands_dict[split_command[0]] = split_command[1:]
-            if 'test-submodules' in commands_dict:
+            if 'test-submodules' in commands_dict and len(commands_dict['test-submodules']) > 0:
                 commands_dict['test-submodules'] = commands_dict['test-submodules'][0].split(',')
             if 'exclude-install' in commands_dict:
                 commands_dict['exclude-install'] = commands_dict['exclude-install'][0].split(',')

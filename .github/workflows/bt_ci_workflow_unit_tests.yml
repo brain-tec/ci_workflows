@@ -118,6 +118,28 @@ jobs:
             echo "Not found log for tests"
             exit 1
           fi;
+      - name: Log Coverage HTML report
+        if: always()
+        run: |
+          if test -f main/logs/*/coverage_out.log; then
+            cd main/logs
+            find . -name "*coverage_out.log" -exec cat {} \;
+            exit 0
+          else
+            echo "Not found coverage html log"
+            exit 1
+          fi;
+      - name: Log Coverage LCOV report
+        if: always()
+        run: |
+          if test -f main/logs/*/coverage_lcov_out.log; then
+            cd main/logs
+            find . -name "*coverage_lcov_out.log" -exec cat {} \;
+            exit 0
+          else
+            echo "Not found coverage LCOV log"
+            exit 1
+          fi;
       - name: Log Summary
         if: always()
         run: |

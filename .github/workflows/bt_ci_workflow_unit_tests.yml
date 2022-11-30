@@ -50,6 +50,7 @@ jobs:
           if [ -d ".docker/tour_tests_screenshots" ]; then
             sudo chown 1000:1000 .docker/tour_tests_screenshots
           fi
+          sudo chown 1000:1000 /tmp/coverage/.coverage
           ${{ inputs.unit_tests_check_command }}
       - name: Log Modules
         if: always()

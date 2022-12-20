@@ -84,6 +84,7 @@ jobs:
   job2:
     name: ${{ matrix.value }}
     needs: job1
+    if: ${{ needs.job1.outputs.matrix != '[]' }}
     strategy:
       matrix:
         value: ${{fromJSON(needs.job1.outputs.matrix)}}
